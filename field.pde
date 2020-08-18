@@ -1,6 +1,8 @@
 class Field{
     PVector function(PVector coords){ // edit this to change the field function.
-        return new PVector(9, coords.x);
+        float x = coords.x;
+        float y = coords.y;
+        return new PVector(1, sin(y) + cos(x));
     }
 
     void drawArrows(){

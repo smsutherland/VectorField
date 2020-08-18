@@ -1,16 +1,87 @@
-Field f;
+import java.lang.Math;
 
-float scale = 20; //pixels per unit
+Field f;
+Particle[][] particles;
+
+final boolean showArrows = false;
+final boolean showParticles = true;
+
+final int recordAfter = 100;
+final int recordFor = 100;
+
+final float scale = 16; //pixels per unit
+final float particleScale = 2; //particles per unit
 
 void setup() {
     size(512, 512);
     noStroke();
     f = new Field();
+    PVector max = maxCoords();
+    if(showParticles){
+        particles = new Particle[2*(int)(max.x*particleScale) + 1][2*(int)(max.y*particleScale) + 1];
+        for(int x = 0; x < particles.length; x++){
+            for(int y = 0; y < particles[x].length; y++){
+                particles[x][y] = new Particle((float)x/particleScale - max.x, (float)y/particleScale - max.y);
+            }
+        }
+    }
+    //particles[0][0].debug();
 }
 
 void draw() {
-    background(255);
-    f.drawArrows();
+    background(0);
+    if(showArrows){
+        f.drawArrows();
+    }
+    if(showParticles){
+        drawParticles();
+        moveParticles();
+        checkParticles();
+        if(frameCount > recordAfter && frameCount <= recordAfter + recordFor){
+            saveFrame("Recording/field-####.png");
+        }
+    }
+
+    if(frameCount == recordAfter + 1){
+        println("Starting recording...");
+    }
+
+    if(frameCount == recordAfter + recordFor){
+        println("Done!");
+    }
+}
+
+void drawParticles(){
+    for(int x = 0; x < particles.length; x++){
+        for(int y = 0; y < particles[x].length; y++){
+            particles[x][y].draw();
+        }
+    }
+}
+
+void moveParticles(){
+    for(int x = 0; x < particles.length; x++){
+        for(int y = 0; y < particles[x].length; y++){
+            particles[x][y].move(1, 0.1);
+        }
+    }
+}
+
+void checkParticles(){
+    PVector max = maxCoords();
+    for(int x = 0; x < particles.length; x++){
+        for(int y = 0; y < particles[x].length; y++){
+            if(particles[x][y].dead()){
+                if(Math.random() > 0.95){
+                    particles[x][y] = new Particle((float)x/particleScale - max.x, (float)y/particleScale - max.y, particles[x][y]);
+                }
+            }
+        }
+    }
+}
+
+PVector function(PVector coords){
+    return f.function(coords);
 }
 
 PVector coordToPixel(PVector coord){
